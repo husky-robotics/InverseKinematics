@@ -29,6 +29,7 @@
   <ItemGroup>
     <Compile Include="Quaternion.cs" />
     <Compile Include="ArmKinematics.cs" />
+    <Compile Include="DualQuaternion.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

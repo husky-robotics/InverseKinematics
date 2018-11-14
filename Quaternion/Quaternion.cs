@@ -13,7 +13,7 @@ namespace Quaternion
         }
         public Quaternion Normalized()
         {
-            float len = Length();
+            float len = Length;
             Quaternion res;
             res.r = r / len;
             res.i = i / len;
@@ -21,14 +21,26 @@ namespace Quaternion
             res.k = k / len;
             return res;
         }
-        public float Length()
+        public float Length
         {
-            return (float)Math.Sqrt(r * r + i * i + j * j + k * k);
+            get
+            {
+                return (float)Math.Sqrt(r * r + i * i + j * j + k * k);
+            }
         }
         public static Quaternion operator !(Quaternion a)
         {
             Quaternion res;
             res.r = a.r;
+            res.i = -a.i;
+            res.j = -a.j;
+            res.k = -a.k;
+            return res;
+        }
+        public static Quaternion operator -(Quaternion a)
+        {
+            Quaternion res;
+            res.r = -a.r;
             res.i = -a.i;
             res.j = -a.j;
             res.k = -a.k;
@@ -43,6 +55,10 @@ namespace Quaternion
             res.k = a.k + b.k;
             return res;
         }
+        public static Quaternion operator -(Quaternion a, Quaternion b)
+        {
+            return a + -b;
+        }
         public static Quaternion operator *(Quaternion a, Quaternion b)
         {
             Quaternion res;
@@ -51,7 +67,7 @@ namespace Quaternion
             res.j = a.r * b.j + b.r * a.j + a.k * b.i - a.i * b.k;
             res.k = a.r * b.k + b.r * a.k + a.i * b.j - a.j * b.i;
             return res;
-        }        
+        }
         public static Quaternion operator *(float len, Quaternion a)
         {
             Quaternion res = a.Normalized();
