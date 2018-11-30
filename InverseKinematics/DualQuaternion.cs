@@ -3,12 +3,12 @@ namespace InverseKinematics
 {
     public struct DualQuaternion
     {
-        public Quaternion Re, Im;
+        public Quaternion Re, Du;
 
-        public DualQuaternion(Quaternion Re, Quaternion Im)
+        public DualQuaternion(Quaternion Re, Quaternion Du)
         {
             this.Re = Re;
-            this.Im = Im;
+            this.Du = Du;
         }
         public float Length
         {
@@ -19,19 +19,19 @@ namespace InverseKinematics
         }
         public static DualQuaternion operator !(DualQuaternion a)
         {
-            return new DualQuaternion(!a.Re, !a.Im);
+            return new DualQuaternion(!a.Re, !a.Du);
         }
         public static DualQuaternion operator ~(DualQuaternion a)
         {
-            return new DualQuaternion(a.Re, -a.Im);
+            return new DualQuaternion(a.Re, -a.Du);
         }
         public static DualQuaternion operator -(DualQuaternion a)
         {
-            return new DualQuaternion(-a.Re, -a.Im);
+            return new DualQuaternion(-a.Re, -a.Du);
         }
         public static DualQuaternion operator +(DualQuaternion a, DualQuaternion b)
         {
-            return new DualQuaternion(a.Re + b.Re, a.Im + b.Im);
+            return new DualQuaternion(a.Re + b.Re, a.Du + b.Du);
         }
         public static DualQuaternion operator -(DualQuaternion a, DualQuaternion b)
         {
@@ -39,7 +39,7 @@ namespace InverseKinematics
         }
         public static DualQuaternion operator *(DualQuaternion a, DualQuaternion b)
         {
-            return new DualQuaternion(a.Re * b.Re, a.Re * b.Im + b.Im * b.Re);
+            return new DualQuaternion(a.Re * b.Re, a.Re * b.Du + b.Du * b.Re);
         }
     }
 }
