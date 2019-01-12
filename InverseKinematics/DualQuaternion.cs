@@ -39,7 +39,14 @@ namespace InverseKinematics
         }
         public static DualQuaternion operator *(DualQuaternion a, DualQuaternion b)
         {
-            return new DualQuaternion(a.Re * b.Re, a.Re * b.Du + b.Du * b.Re);
+            return new DualQuaternion(a.Re * b.Re,(a.Re * b.Du) + (a.Du * b.Re));
         }
+
+        public void print()
+        {
+            Re.print();
+            Du.print();
+        }
+        
     }
 }

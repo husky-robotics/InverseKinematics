@@ -70,12 +70,13 @@ namespace InverseKinematics
         }
         public static Quaternion operator *(float len, Quaternion a)
         {
-            Quaternion res = a.Normalized();
-            res.r *= len;
-            res.i *= len;
-            res.j *= len;
-            res.k *= len;
-            return res;
+            //Quaternion res = new Quaternion();
+            //res.r *= len;
+            //res.i *= len;
+            //res.j *= len;
+            //res.k *= len;
+            ////return res;
+            return new Quaternion(a.r * len, a.i * len, a.j * len, a.k * len);
         }
         public static Quaternion operator *(Quaternion a, float len)
         {
@@ -85,9 +86,46 @@ namespace InverseKinematics
         {
             return (float)len * a;
         }
+
+        //Dot product
+        public static float operator %(Quaternion a, Quaternion b) 
+        {
+            return a.r * b.r + a.i * b.i + a.j * b.j + a.k * b.k;
+        }
+
+        public static Quaternion operator /(Quaternion a, double b)
+        {
+            return (float)(1 / b) * a;
+        }
+
         public static Quaternion operator *(Quaternion a, double len)
         {
             return (float)len * a;
+        }
+
+        public void print()
+        {
+            Console.WriteLine(r + " " + i + " " + j + " " + k);
+        }
+
+        public void zero()
+        {
+            if(Math.Abs(r) < 0.0001)
+            {
+                r = 0;
+            }
+            if (Math.Abs(i) < 0.0001)
+            {
+                i = 0;
+            }
+            if (Math.Abs(j) < 0.0001)
+            {
+                j = 0;
+            }
+            if (Math.Abs(k) < 0.0001)
+            {
+                k = 0;
+            }
         }
     }
 }

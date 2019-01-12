@@ -15,11 +15,11 @@ namespace InverseKinematics
         int originY;
         Point origin;
         int angleIncrement = 10;
-        static int armCount = 2;
-        int[] angleX = new int[armCount];
-        int[] angleY = new int[armCount];
-        int[] angleZ = new int[armCount];
-        int armLength = 50;
+        static int armCount = 3;
+        int[] angleX = { 0 , 0, 0};//new int[armCount];
+        int[] angleY = { 0 , 0, 0};//new int[armCount];
+        int[] angleZ = { 0 , 0, 0};//new int[armCount];
+        int[] armLength = { 50, 50, 50};
 
         public _3D() : base()
         {
@@ -93,6 +93,37 @@ namespace InverseKinematics
                     angleZ[1] -= angleIncrement;
                     this.Invalidate();
                 }
+                /////////////////////////////////BRANCH 2//////////////////////////////////
+                if (e.KeyCode == Keys.Y)
+                {
+                    angleX[2] += angleIncrement;
+                    this.Invalidate();
+                }
+                else if (e.KeyCode == Keys.T)
+                {
+                    angleX[2] -= angleIncrement;
+                    this.Invalidate();
+                }
+                if (e.KeyCode == Keys.H)
+                {
+                    angleY[2] += angleIncrement;
+                    this.Invalidate();
+                }
+                else if (e.KeyCode == Keys.G)
+                {
+                    angleY[2] -= angleIncrement;
+                    this.Invalidate();
+                }
+                if (e.KeyCode == Keys.N)
+                {
+                    angleZ[2] += angleIncrement;
+                    this.Invalidate();
+                }
+                else if (e.KeyCode == Keys.B)
+                {
+                    angleZ[2] -= angleIncrement;
+                    this.Invalidate();
+                }
             };
 
         }
@@ -120,76 +151,104 @@ namespace InverseKinematics
             originY = this.Height / 2;
             origin = new Point((int)originX, (int)originY);
 
-            float theta = 0;
-            float phi = 0;
-            float alpha = (float)Math.PI / 2;
-
-            //Quaternion R = new Quaternion((float)Math.Cos(theta / 2), (float)Math.Sin(theta / 2), 0, 0);
-            //Quaternion P = new Quaternion((float)Math.Cos(phi / 2), 0, (float)Math.Sin(phi / 2), 0);
-            //Quaternion Y = new Quaternion((float)Math.Cos(alpha / 2), 0, 0, (float)Math.Sin(alpha / 2));
-            //Quaternion Rconj = !R;
-            //Quaternion Pconj = !P;
-            //Quaternion Yconj = !Y;
             Graphics g = obj.Graphics;
 
-            List<Quaternion> quatList = new List<Quaternion>();
+            List<float>[] points = new List<float>[armCount];
+            //points[0] = new List<float>();
+            //points[0].Add(0);
+            //points[0].Add(0);
+            //points[0].Add(0);
 
-            for (int i = 0; i < angleX.Length; i++)
+            Quaternion temp = new Quaternion(0, armLength[0], 0, 0);
+
+            float theta = angleX[0];
+            float phi = angleY[0];
+            float alpha = angleZ[0];
+
+            Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
+            Quaternion Y = new Quaternion((float)Math.Cos(rad(phi / 2)), 0, (float)Math.Sin(rad(phi / 2)), 0);
+            Quaternion P = new Quaternion((float)Math.Cos(rad(alpha / 2)), 0, 0, (float)Math.Sin(rad(alpha / 2)));
+
+            Quaternion XAxis = new Quaternion(0, 1, 0, 0);
+            Quaternion YAxis = new Quaternion(0, 0, 1, 0);
+            Quaternion ZAxis = new Quaternion(0, 0, 0, 1);
+
+            for (int b = 0; b < armCount; b++)
             {
-                quatList.Add(new Quaternion(0, armLength, 0, 0));
+                points[b] = new List<float>();
+                switch (b)
+                {
+                    case 0:
+                        temp = new Quaternion(0, armLength[0], 0, 0);
+                        break;
+                    case 1:
+                        temp = new Quaternion(0, points[b - 1][0], points[b - 1][1], points[b - 1][2]);
+                        break;
+                    default:
+                        temp = new Quaternion(0, points[b - 1][0] - points[b - 2][0], points[b - 1][1] - points[b - 2][1],
+                                                                                      points[b - 1][2] - points[b - 2][2]);
+                        temp = temp.Normalized() * armLength[b];
+                        break;
+                }
+
+                theta = angleX[b];
+                phi = angleY[b];
+                alpha = angleZ[b];
+
+                double ro = Math.Sin(rad(theta / 2));
+                R.r = (float)Math.Cos(rad(theta / 2));
+                R.i = (float)(XAxis.i * ro); //Vx sin theta/2
+                R.j = (float)(XAxis.j * ro);
+                R.k = (float)(XAxis.k * ro);
+
+                ro = Math.Sin(rad(phi / 2));
+                Y.r = (float)Math.Cos(rad(phi / 2));
+                Y.i = (float)(YAxis.i * ro);
+                Y.j = (float)(YAxis.j * ro);
+                Y.k = (float)(YAxis.k * ro);
+
+                ro = Math.Sin(rad(alpha / 2));
+                P.r = (float)Math.Cos(rad(alpha / 2));
+                P.i = (float)(ZAxis.i * ro);
+                P.j = (float)(ZAxis.j * ro);
+                P.k = (float)(ZAxis.k * ro);
+
+                temp = R * (Y * (P * temp * !P) * !Y) * !R;
+
+                XAxis = R * (Y * (P * XAxis * !P) * !Y) * !R;
+                YAxis = R * (Y * (P * YAxis * !P) * !Y) * !R;
+                ZAxis = R * (Y * (P * ZAxis * !P) * !Y) * !R;
+
+                switch (b)
+                {
+                    case 0:
+                        points[b].Add(temp.i);
+                        points[b].Add(temp.j);
+                        points[b].Add(temp.k);
+                        break;
+                    default:
+                        points[b].Add(points[b - 1][0] + temp.i);
+                        points[b].Add(points[b - 1][1] + temp.j);
+                        points[b].Add(points[b - 1][2] + temp.k);
+                        break;
+                }
+                
             }
 
+
+            //Drawing
             Point endP = new Point(0, 0);
             Point endP2 = new Point(0, 0);
-
-            for (int b = 0; b < quatList.Count; b++)
+            for (int a = 0; a < armCount; a++)
             {
-                theta = getAngle(b, angleX);
-                phi = getAngle(b, angleY);
-                alpha = getAngle(b, angleZ);
-
-                Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
-                Quaternion Y = new Quaternion((float)Math.Cos(rad(phi / 2)), 0, (float)Math.Sin(rad(phi / 2)), 0);
-                Quaternion P = new Quaternion((float)Math.Cos(rad(alpha / 2)), 0, 0, (float)Math.Sin(rad(alpha / 2)));
-                Quaternion Rconj = !R;
-                Quaternion Yconj = !Y;
-                Quaternion Pconj = !P;
-
-                Quaternion temp = quatList[b];
-                quatList[b] = R * (Y * (P * temp * Pconj) * Yconj) * Rconj;
-            }
-
-
-            for (int a = 0; a < quatList.Count; a++)
-            {
-                if (a == 0)
-                {
-                    endP = origin;
-                }
-                endP2 = new Point((int)((Math.Round(endP.X + (quatList[a].i)))),
-                                  (int)((Math.Round(endP.Y - (quatList[a].j)))));
-
-                g.DrawLine(Pens.Black, endP, endP2);
+                endP2 = new Point((int)points[a][0], (int)points[a][1]);
+                g.DrawLine(Pens.Black, cartesian(endP), cartesian(endP2));
                 endP = endP2;
             }
-            Console.WriteLine(angleX[0] + " " + angleY[0] + " " + angleZ[0]);
-            Console.WriteLine(cartesian(endP2));
+            Console.WriteLine(points[points.Length - 1][0] + " " + points[points.Length - 1][1]);
         }
 
-        public int getZ(List<Quaternion> list)
-        {
-            float sum = 0;
-
-            for (int i = 0; i < list.Count; i++)
-            {
-                sum += (list[i].Length * angleZ[i]);
-            }
-
-            return (int)sum;
-
-        }
-
-        public int getAngle(int i, int[] array)
+        public int sumAngle(int i, int[] array)
         {
             int sum = 0;
             for (int j = 0; j <= i; j++)
@@ -206,7 +265,7 @@ namespace InverseKinematics
 
         public Point cartesian(Point p)
         {
-            return new Point(-(originX - p.X), originY - p.Y);
+            return cartesian(p.X, p.Y);
         }
 
         public Point cartesian(int x, int y)
