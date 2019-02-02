@@ -25,11 +25,18 @@ namespace InverseKinematics
             _3D window = new _3D();
 
             Application.Run(window);
-            //            FKDualQuat();
-            
+            //            FKDualQuat();//    -348 -710
+
+
+            //Quaternion a = new Quaternion(1, 2, 3, 4);
+            //Quaternion b = new Quaternion(2, 7, 6, 5);
+            //Quaternion c = new Quaternion(3, 8, 9, 10);
+            //Quaternion d = !a * !b * !c;
+            //Console.WriteLine(d.r + " " + d.i + " " + d.j + " " + d.k);
 
         }
 
+        
 
         static void IKQuat(float[] the, float[] phi, float[] bet,float[] lengths, float[] end)
         {
