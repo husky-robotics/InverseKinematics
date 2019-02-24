@@ -11,10 +11,10 @@ namespace InverseKinematics
     class Program
     {
         static int arms = 3;
-        static float[] armLength = { 50, 50, 50, 50 };
-        static float[] angleX = { 0, 0, 0, 0 };
-        static float[] angleY = { 0, 0, 0, 0 };
-        static float[] angleZ = { 90, 90, 0, 0 };
+        static float[] armLength = { 50, 50, 50 };
+        static float[] angleX = { 0, 0, 0 };
+        static float[] angleY = { 0, 0, 0 };
+        static float[] angleZ = { 0, 0, 0 };
 
         static void Main(string[] args)
         {
@@ -22,218 +22,100 @@ namespace InverseKinematics
             //DrawingWindow window = new DrawingWindow();
 
             //For 3D
-            _3D window = new _3D();
+            //_3D window = new _3D();
+            //Application.Run(window);
 
-            Application.Run(window);
-            //            FKDualQuat();//    -348 -710
-
-
-            //Quaternion a = new Quaternion(1, 2, 3, 4);
-            //Quaternion b = new Quaternion(2, 7, 6, 5);
-            //Quaternion c = new Quaternion(3, 8, 9, 10);
-            //Quaternion d = !a * !b * !c;
-            //Console.WriteLine(d.r + " " + d.i + " " + d.j + " " + d.k);
+            fkTest(true);
 
         }
 
-        
-
-        static void IKQuat(float[] the, float[] phi, float[] bet,float[] lengths, float[] end)
+        public static void fkTest(bool b)
         {
-            float xc = 0;
-            float yc = 0;
-            float zc = 90;
+            float[] x = { 1f, 1f, 1f };
+            float[] y = { 1f, 1f, 1f };
+            float[] z = { 1f, 1f, 1f };
+            float[] length = { 50, 50, 50 };
+            float[] dest = { 70, 70, 70 };
+            int[] Xmin = { 0, 0, 0 };
+            int[] Xmax = { 360, 360, 360 };
+            int[] Ymin = { 0, 0, 0 };
+            int[] Ymax = { 360, 360, 360 };
+            int[] Zmin = { 0, 0, 0 };
+            int[] Zmax = { 360, 360, 360 };
 
+            ForwardKinematics fk = new ForwardKinematics(x, y, z, length, Xmin, Xmax, Ymin, Ymax, Zmin, Zmax);
 
-            float dTheta = 0;
-            float dPhi = 0;
-            float dBeta = 0;
-
-            float[,] der = new float[3, the.Length];
-
-            List<float>[] deri = new List<float>[the.Length];
-
-            for(int i = 0; i < der.Length; i++)
+            if (b)
             {
-                Quaternion qRot = rot(the[i], phi[i], bet[i]);
-                Quaternion dT = rot(the[i] + dTheta, phi[i], bet[i]);
-                Quaternion dP = rot(the[i], phi[i], bet[i]);
-                Quaternion dB = rot(the[i], phi[i], bet[i]);
-
-                Quaternion dadt = (dT - qRot) / dTheta;
-                Quaternion dadp = (dT - qRot) / dPhi;
-                Quaternion dadb = (dT - qRot) / dBeta;
-
-                //deri[i].Add(dadt.dGam(end));
-                //deri[i].Add(dadp.dGam(end));
-                //deri[i].Add(dadb.dGam(end));
-
+                ikTest(fk, dest);
             }
 
-            for (int i = 0; i < deri.Length; i++)
-            {
-                the[i] += deri[i][0];
-                phi[i] += deri[i][1];
-                bet[i] += deri[i][2];
-            }
+            float[] ep = fk.getEndpoint();
 
-            if (pow(end[0] - xc, 2) + pow(end[1] - yc, 2) + pow(end[2] - zc, 2) > 1)
-            {
-                IKQuat(the, phi, bet, lengths, end);
-            }
-
+            Console.WriteLine(ep[0] + " " + ep[1] + " " + ep[2]);
         }
 
+        public static void ikTest(ForwardKinematics fk, float[] dest)
+        {
+            IK inv = new IK(fk, dest);
+            float[][] finalAngles = inv.getAngles();
+        }
 
-
-
-
-
-
-        //static void FKDualQuat()
+        //static Quaternion rot(float theta, float phi, float alpha)
         //{
-            
+        //    Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
+        //    R *= new Quaternion((float)Math.Cos(rad(phi / 2)), 0, (float)Math.Sin(rad(phi / 2)), 0);
+        //    R *= new Quaternion((float)Math.Cos(rad(alpha / 2)), 0, 0, (float)Math.Sin(rad(alpha / 2)));
 
-
-        //    DualQuaternion[] quatList = new DualQuaternion[arms];
-        //    DualQuaternion endDualQuat = new DualQuaternion(new Quaternion(0,0,0,0), new Quaternion(0,0,0,0));
-
-        //    for (int i = 0; i < arms; i++)
-        //    {
-        //        //Quaternion R = new Quaternion((float)Math.Cos(rad(angleX[i] / 2)), (float)Math.Sin(rad(angleX[i] / 2)), 0, 0);
-        //        //Quaternion Y = new Quaternion((float)Math.Cos(rad(angleY[i] / 2)), 0, (float)Math.Sin(rad(angleY[i] / 2)), 0);
-        //        //Quaternion P = new Quaternion((float)Math.Cos(rad(angleZ[i] / 2)), 0, 0, (float)Math.Sin(rad(angleZ[i] / 2)));
-
-        //        Quaternion R = new Quaternion((float)cos((angleX[i] / 2)), (float)sin((angleX[i] / 2)), 0, 0);
-        //        Quaternion Y = new Quaternion((float)cos((angleY[i] / 2)), 0, (float)sin((angleY[i] / 2)), 0);
-        //        Quaternion P = new Quaternion((float)cos((angleZ[i] / 2)), 0, 0, (float)sin((angleZ[i] / 2)));
-
-        //        Quaternion qRot = //new Quaternion(1, 0, 0, 0);
-        //            R * Y * P;
-
-        //        DualQuaternion qDRotation = new DualQuaternion(qRot, new Quaternion(0, 0, 0, 0));
-
-        //        DualQuaternion qTrans = new DualQuaternion(new Quaternion(1, 0, 0, 0), (new Quaternion(0, armLength[i] / 2, 0, 0)));
-        //        //DualQuaternion qTrans = new DualQuaternion(qRot, (new Quaternion(0, armLength[i] * cos(getAngle(i, angleZ)) / 2, armLength[i] * sin(getAngle(i, angleZ)) / 2,  0)));
-
-        //        quatList[i] = qTrans * qDRotation;
-
-        //        //quatList[i].print();
-
-
-        //        //quatList[i] = new DualQuaternion(qRot, (new Quaternion(0, (armLength[i]) / 2, 0, 0)) * qRot);
-
-        //        Console.WriteLine("Arm Segment " + i);
-        //        quatList[i].Re.zero();
-        //        quatList[i].Re.print();
-        //        quatList[i].Du.zero();
-        //        quatList[i].Du.print();
-
-        //        //if (i == 0)
-        //        //{
-        //        //    endDualQuat = quatList[0];
-        //        //}
-        //        //else
-        //        //{
-        //        //    endDualQuat = endDualQuat * quatList[i];
-        //        //}
-        //        Console.WriteLine();
-        //    }
-
-        //    endDualQuat = quatList[0];
-
-        //    for(int i = 1; i < arms; i++)
-        //    {
-        //        endDualQuat = endDualQuat * quatList[i];
-        //    }
-
-        //    Console.WriteLine("endDualQuat");
-        //    endDualQuat.print();
-        //    Console.WriteLine();
-
-        //    //(endDualQuat.Re * !endDualQuat.Re).print();
-
-        
-        //    Quaternion endQuat = (endDualQuat.Re) * (2 *(endDualQuat.Du) * (!endDualQuat.Re)) * (!endDualQuat.Re);
-
-        //    //endDualQuat.Re.print();
-        //    //endDualQuat.Du.print();
-
-        //    //(!endDualQuat.Re).print();
-
-        //    //(((endDualQuat.Du)) * (!endDualQuat.Re)).print();
-
-        //    Console.WriteLine("Final Position");
-        //    endQuat.zero();
-        //    endQuat.print();
-
-        //    //temp.print();
-
-        //    //endQuat.print();
-
-        //    //Quaternion q1 = new Quaternion((float)(Math.Sqrt(2) / 2), 0, 0, (float)( Math.Sqrt(2) / 2));
-        //    //Quaternion q2 = new Quaternion(0, (float)(25 * Math.Sqrt(2) / 2), -25 * (float)(Math.Sqrt(2)) / 2, 0);
-        //    //((q1 * q2) + (q2 * q1)).print();
-
-
+        //    return R;
         //}
 
+        //public static float pow(float i, float k)
+        //{
+        //    return (float)Math.Pow(i, k);
+        //}
 
-        static Quaternion rot(float theta, float phi, float alpha)
-        {
-            Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
-            R *= new Quaternion((float)Math.Cos(rad(phi / 2)), 0, (float)Math.Sin(rad(phi / 2)), 0);
-            R *= new Quaternion((float)Math.Cos(rad(alpha / 2)), 0, 0, (float)Math.Sin(rad(alpha / 2)));
+        //static double rad(float i)
+        //{
+        //    return i * Math.PI / 180;
+        //}
 
-            return R;
-        }
+        //static float sin(float d)
+        //{
+        //    return (float)(Math.Sin(rad(d)));
+        //}
 
-        public static float pow(float i, float k)
-        {
-            return (float)Math.Pow(i, k);
-        }
+        //static float cos(float f)
+        //{
+        //    return (float) (Math.Cos(rad(f)));
+        //}
 
-        static double rad(float i)
-        {
-            return i * Math.PI / 180;
-        }
+        //static float getX(int i)
+        //{
+        //    float b = 0;
+        //    for(int j = 0; j <= i; j++)
+        //    {
+        //        b += angleX[j];
+        //    } return b;
+        //}
 
-        static float sin(float d)
-        {
-            return (float)(Math.Sin(rad(d)));
-        }
-
-        static float cos(float f)
-        {
-            return (float) (Math.Cos(rad(f)));
-        }
-
-        static float getX(int i)
-        {
-            float b = 0;
-            for(int j = 0; j <= i; j++)
-            {
-                b += angleX[j];
-            } return b;
-        }
-
-        static float getY(int i)
-        {
-            float b = 0;
-            for (int j = 0; j <= i; j++)
-            {
-                b += angleY[j];
-            }
-            return b;
-        }
-        static float getZ(int i)
-        {
-            float b = 0;
-            for (int j = 0; j <= i; j++)
-            {
-                b += angleZ[j];
-            }
-            return b;
-        }
+        //static float getY(int i)
+        //{
+        //    float b = 0;
+        //    for (int j = 0; j <= i; j++)
+        //    {
+        //        b += angleY[j];
+        //    }
+        //    return b;
+        //}
+        //static float getZ(int i)
+        //{
+        //    float b = 0;
+        //    for (int j = 0; j <= i; j++)
+        //    {
+        //        b += angleZ[j];
+        //    }
+        //    return b;
+        //}
     }
 }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -27,11 +27,15 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ForwardKinematics.cs" />
+    <Compile Include="IK.cs" />
     <Compile Include="Quaternion.cs" />
     <Compile Include="ArmKinematics.cs" />
     <Compile Include="DualQuaternion.cs" />
     <Compile Include="Program.cs" />
-    <Compile Include="_3D.cs" />
+    <Compile Include="_3D.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Drawing" />

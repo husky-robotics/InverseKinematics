@@ -15,10 +15,10 @@ namespace InverseKinematics
         List<float>[] points;
 
         static int armCount = 3;
-        float[] angleX = { 0 , 0, 0 };
-        float[] angleY = { 0 , 0, 0 };
-        float[] angleZ = { 0 , 0, 0 };
-        float[] armLength = { 50, 50, 50 };
+        float[] angleX = { 0, 0, 0 };
+        float[] angleY = { 0, 0, 0 };
+        float[] angleZ = { 0, 0, 0 };
+        float[] armLength = { 50, 50, 50};
         float maxLength;
 
         Quaternion[] quatList;
@@ -28,13 +28,13 @@ namespace InverseKinematics
 
 
         List<float> currentPosition = new List<float>();
-        int[] finalPosition = { 100, 0, 0 };
+        int[] finalPosition = { 70, 70, 70 };
         float cost;
         int counter = 0;
 
         //Testing optimal combinations
-        float scaleFactor = 999f;
-        float del = 0.01f;
+        float scaleFactor = 1500f;
+        float del = 0.001f;
 
 
         public _3D() : base()
@@ -47,7 +47,8 @@ namespace InverseKinematics
 
 
 
-            if(maxLength == 0) {
+            if (maxLength == 0)
+            {
                 foreach (int i in armLength)
                 {
                     maxLength += i;
@@ -60,13 +61,14 @@ namespace InverseKinematics
             //Keys to move each arm individually
             this.MouseDown += (object sender, MouseEventArgs e) =>
             {
+                Console.WriteLine("Click");
                 Point p = target(new Point(e.Location.X, e.Location.Y));
-                finalPosition[0] = -100;
-                finalPosition[1] = 100;
-                finalPosition[2] = 0;
+                finalPosition[0] = 70;
+                finalPosition[1] = 70;
+                finalPosition[2] = 70;
 
                 int l = 0;
-                while (cost > 0.1)
+                while (cost > 0.5)
                 {
                     directMove();
                     l++;
@@ -169,7 +171,7 @@ namespace InverseKinematics
                     angleZ[2] -= angleIncrement;
                     this.Invalidate();
                 }
-                if(e.KeyCode == Keys.P)
+                if (e.KeyCode == Keys.P)
                 {
                     calculatePartials();
                     this.Invalidate();
@@ -211,7 +213,7 @@ namespace InverseKinematics
             Quaternion P;
             Quaternion Y;
 
-            
+
             //Rotating
             for (int b = 0; b < armCount; b++)
             {
@@ -268,7 +270,7 @@ namespace InverseKinematics
             for (int b = 0; b < quatList.Length; b++)
             {
                 points[b] = new List<float>();
-                if(b == 0)
+                if (b == 0)
                 {
                     points[b].Add(quatList[b].i);
                     points[b].Add(quatList[b].j);
@@ -305,7 +307,8 @@ namespace InverseKinematics
             }
 
             g.DrawLine(Pens.Red, cartesian(endP), cartesian(new Point(finalPosition[0], finalPosition[1])));
-            //g.DrawEllipse(Pens.Red, originX - (maxLength*3/2), originY - (maxLength*3/2), maxLength*3, 3*maxLength);
+            g.DrawEllipse(Pens.Red, originX - (maxLength), originY - (maxLength), 2*maxLength, 2*maxLength);
+            //g.DrawEllipse()
 
             Console.WriteLine(points[points.Length - 1][0] + " " + points[points.Length - 1][1] + " " + points[points.Length - 1][2]);
             Console.WriteLine(cost);
@@ -324,7 +327,7 @@ namespace InverseKinematics
             float x = points[joint - 1][0] + a.i;
             float y = points[joint - 1][1] + a.j;
             float z = points[joint - 1][2] + a.k;
-            
+
             return (float)(Math.Sqrt(Math.Pow(x, 2) + Math.Pow(y, 2) + Math.Pow(z, 2)));
         }
 
@@ -340,17 +343,17 @@ namespace InverseKinematics
             {
                 angleX[i] += delta;
                 rotating(null, false);
-                Console.WriteLine("Branch " + i + " dTheta: " + ((cost - c)/delta));
+                Console.WriteLine("Branch " + i + " dTheta: " + ((cost - c) / delta));
                 angleX[i] -= delta;
 
                 angleY[i] += delta;
                 rotating(null, false);
-                Console.WriteLine("Branch " + i + " dPhi: " + ((cost - c)/delta));
+                Console.WriteLine("Branch " + i + " dPhi: " + ((cost - c) / delta));
                 angleY[i] -= delta;
 
                 angleZ[i] += delta;
                 rotating(null, false);
-                Console.WriteLine("Branch " + i + " dBeta: " + ((cost - c)/delta));
+                Console.WriteLine("Branch " + i + " dBeta: " + ((cost - c) / delta));
                 angleZ[i] -= delta;
                 rotating(null, false);
 
@@ -370,9 +373,9 @@ namespace InverseKinematics
             float[,] dAngles = new float[armCount, 3];
             float[][] angles = { angleX, angleY, angleZ };
 
-            for(int i = 0; i < armCount; i++)
+            for (int i = 0; i < armCount; i++)
             {
-                for(int j = 0; j < 3; j++)
+                for (int j = 0; j < 3; j++)
                 {
                     angles[j][i] += delta;
                     rotating();
@@ -390,14 +393,15 @@ namespace InverseKinematics
         {
             float scaleFactor = this.scaleFactor;
             float[,] dAngles = returnPartials();
+            float gMag = gradientMag(dAngles);
 
             for (int i = 0; i < armCount; i++)
             {
-                int j = (armCount - i);
                 angleX[i] += scaleFactor * dAngles[i, 0];
                 angleY[i] += scaleFactor * dAngles[i, 1];
                 angleZ[i] += scaleFactor * dAngles[i, 2];
             }
+
             rotating();
         }
 
@@ -406,7 +410,7 @@ namespace InverseKinematics
         public float gradientMag(float[,] dAngles)
         {
             float f = 0f;
-            for(int i = 0; i < armCount; i++)
+            for (int i = 0; i < armCount; i++)
             {
                 f += (float)(Math.Pow((double)(dAngles[i, 0]), 2));
                 f += (float)(Math.Pow((double)(dAngles[i, 1]), 2));
