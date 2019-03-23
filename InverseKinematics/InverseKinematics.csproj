@@ -27,12 +27,14 @@
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="FABRIK.cs" />
     <Compile Include="ForwardKinematics.cs" />
     <Compile Include="IK.cs" />
     <Compile Include="Quaternion.cs" />
     <Compile Include="ArmKinematics.cs" />
     <Compile Include="DualQuaternion.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="TDPoint.cs" />
     <Compile Include="_3D.cs">
       <SubType>Form</SubType>
     </Compile>

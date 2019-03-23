@@ -25,15 +25,18 @@ namespace InverseKinematics
             //_3D window = new _3D();
             //Application.Run(window);
 
-            fkTest(true);
+            //fkTest(true);
+            FABRIKTest();
+
+
 
         }
 
         public static void fkTest(bool b)
         {
-            float[] x = { 1f, 1f, 1f };
-            float[] y = { 1f, 1f, 1f };
-            float[] z = { 1f, 1f, 1f };
+            float[] x = { 0f, 0f, 0f };
+            float[] y = { 0f, 0f, 0f };
+            float[] z = { 0f, 0f, 0f };
             float[] length = { 50, 50, 50 };
             float[] dest = { 70, 70, 70 };
             int[] Xmin = { 0, 0, 0 };
@@ -61,6 +64,17 @@ namespace InverseKinematics
             float[][] finalAngles = inv.getAngles();
         }
 
+        public static void FABRIKTest()
+        {
+            TDPoint[] points = { new TDPoint(0, 0, 0), new TDPoint(50, 0, 0), new TDPoint(100, 0, 0) };
+            float[] lengths = { 50f, 50f };
+            TDPoint target = new TDPoint(10f, 10f, 10f);
+
+            FABRIK f = new FABRIK(points, lengths, target);
+
+            f.converge();
+        }
+        
         //static Quaternion rot(float theta, float phi, float alpha)
         //{
         //    Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
