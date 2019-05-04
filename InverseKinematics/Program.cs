@@ -10,7 +10,6 @@ namespace InverseKinematics
 {
     class Program
     {
-        static int arms = 3;
         static float[] armLength = { 50, 50, 50 };
         static float[] angleX = { 0, 0, 0 };
         static float[] angleY = { 0, 0, 0 };
@@ -26,10 +25,13 @@ namespace InverseKinematics
             //Application.Run(window);
 
             //fkTest(true);
+
             FABRIKTest();
+        }
 
-
-
+        public static void alignmentTest()
+        {
+            TDPoint t = new TDPoint(10, 10, 0);
         }
 
         public static void fkTest(bool b)
@@ -66,70 +68,29 @@ namespace InverseKinematics
 
         public static void FABRIKTest()
         {
-            TDPoint[] points = { new TDPoint(0, 0, 0), new TDPoint(50, 0, 0), new TDPoint(100, 0, 0) };
-            float[] lengths = { 50f, 50f };
-            TDPoint target = new TDPoint(10f, 10f, 10f);
+            TDPoint target = new TDPoint(50f, 50f, 50f);
+            float r = (float)(Math.PI / 180);
 
-            FABRIK f = new FABRIK(points, lengths, target);
+            ArmPartQ a1 = new ArmPartQ(0, 0, 10, 0,
+                                       0, 0, 0, 0, 90 * r, 90 * r);
+            ArmPartQ a2 = new ArmPartQ(0, 50, 0, 0,
+                                       0, 0, 0, 0, 0 * r , 360 * r);
+            ArmPartQ a3 = new ArmPartQ(0, 50, 0, 0,
+                                       0, 0, 0, 0, 0 * r , 360 * r);
+            ArmPartQ a4 = new ArmPartQ(0, 50, 0, 0,
+                                       0, 0, 0, 0, 0 * r, 180 * r);
 
-            f.converge();
+            ArmPartQ[] a10 = {a1, a2, a3, a4};
+
+            ArmQ arm1 = new ArmQ(a10);
+            FABRIK f = new FABRIK(arm1);
+            arm1.converge(target);
+            //f.converge2D(target);
         }
-        
-        //static Quaternion rot(float theta, float phi, float alpha)
-        //{
-        //    Quaternion R = new Quaternion((float)Math.Cos(rad(theta / 2)), (float)Math.Sin(rad(theta / 2)), 0, 0);
-        //    R *= new Quaternion((float)Math.Cos(rad(phi / 2)), 0, (float)Math.Sin(rad(phi / 2)), 0);
-        //    R *= new Quaternion((float)Math.Cos(rad(alpha / 2)), 0, 0, (float)Math.Sin(rad(alpha / 2)));
 
-        //    return R;
-        //}
-
-        //public static float pow(float i, float k)
-        //{
-        //    return (float)Math.Pow(i, k);
-        //}
-
-        //static double rad(float i)
-        //{
-        //    return i * Math.PI / 180;
-        //}
-
-        //static float sin(float d)
-        //{
-        //    return (float)(Math.Sin(rad(d)));
-        //}
-
-        //static float cos(float f)
-        //{
-        //    return (float) (Math.Cos(rad(f)));
-        //}
-
-        //static float getX(int i)
-        //{
-        //    float b = 0;
-        //    for(int j = 0; j <= i; j++)
-        //    {
-        //        b += angleX[j];
-        //    } return b;
-        //}
-
-        //static float getY(int i)
-        //{
-        //    float b = 0;
-        //    for (int j = 0; j <= i; j++)
-        //    {
-        //        b += angleY[j];
-        //    }
-        //    return b;
-        //}
-        //static float getZ(int i)
-        //{
-        //    float b = 0;
-        //    for (int j = 0; j <= i; j++)
-        //    {
-        //        b += angleZ[j];
-        //    }
-        //    return b;
-        //}
+        public static double rad(float angle)
+        {
+            return (Math.PI / 180) * angle;
+        }
     }
 }

@@ -17,7 +17,7 @@ namespace InverseKinematics
         static int armCount = 3;
         float[] angleX = { 0, 0, 0 };
         float[] angleY = { 0, 0, 0 };
-        float[] angleZ = { 0, 0, 0 };
+        float[] angleZ = { 18, 86, 31 };
         float[] armLength = { 50, 50, 50};
         float maxLength;
 
@@ -28,7 +28,7 @@ namespace InverseKinematics
 
 
         List<float> currentPosition = new List<float>();
-        int[] finalPosition = { 70, 70, 70 };
+        int[] finalPosition = { 70, 70, 0 };
         float cost;
         int counter = 0;
 
