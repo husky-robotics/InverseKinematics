@@ -19,16 +19,7 @@ namespace InverseKinematics
             updatePoints();
         }
 
-        //tupules in the future?
-        //public FABRIK(ArmQ arm, (float x, float y, float z) target)
-        //{
-        //    this.target2 = target;
-        //    this.arm = arm;
-        //    points = new TDPoint[arm.parts.Length + 1];
-        //    updatePoints();
-        //    this.cost = calcCost();
-        //}
-
+        
         public void converge2D(TDPoint target) {
             TDPoint tShadow = new TDPoint(target.x, 0, target.z);
             TDPoint aShadow = new TDPoint(points[points.Length - 1].x, 0, points[points.Length - 1].z);
@@ -60,14 +51,14 @@ namespace InverseKinematics
                     {
                         points[i + 1] = tar;
                     }
-                    points[i] = points[i + 1] + ((points[i] - points[i + 1]).Normalized() * arm.parts[i].arm.Length);
+                    points[i] = points[i + 1] + ((points[i]|points[i + 1]).Normalized() * arm.parts[i].arm.Length);
                 }
 
                 points[0].set(0, 0, 0);
                 for (int i = 1; i < points.Length; i++)
                 {
-                    arm.parts[i - 1].arm = ((points[i] - points[i - 1]).Normalized() * arm.parts[i - 1].arm.Length);
-                    points[i] = points[i - 1] + arm.parts[i - 1].arm;
+                    //arm.parts[i - 1].arm = ((points[i]|points[i - 1]).Normalized() * arm.parts[i - 1].arm.Length);
+                    points[i] = points[i - 1] + ((points[i] | points[i - 1]).Normalized() * arm.parts[i - 1].arm.Length);
                 }
 
                 //angle constraints
@@ -122,13 +113,6 @@ namespace InverseKinematics
 
         }
 
-        //public void recAdjustments(int index, double[] changes, double change)
-        //{
-        //    for(int i = index; i < changes.Length; i++)
-        //    {
-        //        changes[i] += change;
-        //    }
-        //}
 
         public void updatePoints() {
             points[0] = new TDPoint(0, 0, 0);

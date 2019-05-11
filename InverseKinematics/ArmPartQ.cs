@@ -8,13 +8,25 @@ namespace InverseKinematics
 {
     public class ArmPartQ
     {
-        public Quaternion arm;
+        //public Quaternion arm;
         public float Xmin, Xmax, Ymin, Ymax, Zmin, Zmax;
+        public float length;
         //public bool Xfix, Zfix;
 
         public ArmPartQ(float r, float i, float j, float k, float Xmin, float Xmax, float Ymin, float Ymax, float Zmin, float Zmax)
         {
-            arm = new Quaternion(r, i, j, k);
+            //arm = new Quaternion(r, i, j, k);
+            this.Xmin = Xmin;
+            this.Xmax = Xmax;
+            this.Ymin = Ymin;
+            this.Ymax = Ymax;
+            this.Zmin = Zmin;
+            this.Zmax = Zmax;
+        }
+
+        public ArmPartQ(float length, float Xmin, float Xmax, float Ymin, float Ymax, float Zmin, float Zmax)
+        {
+            this.length = length;
             this.Xmin = Xmin;
             this.Xmax = Xmax;
             this.Ymin = Ymin;
@@ -30,13 +42,23 @@ namespace InverseKinematics
         public float[] Zcur;
         public TDPoint[] points;
         public double cost;
+        public float baser;
+
+
+        public ArmQ(float[] z, float br, ArmPartQ[] segs)
+        {
+            Zcur = z;
+            points = new TDPoint[z.Length + 1];
+            baser = br;
+            parts = segs;
+        }
 
         public ArmQ(ArmPartQ[] segs)
         {
-            parts = segs;
-            Zcur = new float[parts.Length];
-            points = new TDPoint[parts.Length + 1];
-            updatePoints();
+            //parts = segs;
+            //Zcur = new float[parts.Length];
+            //points = new TDPoint[parts.Length + 1];
+            //updatePoints();
         }
 
         public void converge(TDPoint target)
@@ -67,13 +89,13 @@ namespace InverseKinematics
                     if (i == points.Length - 2) {
                         points[i + 1] = tar;
                     }
-                    points[i] = points[i + 1] + ((points[i] - points[i + 1]).Normalized() * parts[i].arm.Length);
+                    points[i] = points[i + 1] + ((points[i] - points[i + 1]).Normalized() * parts[i].length);
                 }
 
                 points[0].set(0, 0, 0);
                 for (int i = 1; i < points.Length; i++) {
-                    parts[i - 1].arm = ((points[i] - points[i - 1]).Normalized() * parts[i - 1].arm.Length);
-                    points[i] = points[i - 1] + parts[i - 1].arm;
+                    //parts[i - 1].arm = ((points[i] - points[i - 1]).Normalized() * parts[i - 1].arm.Length);
+                    points[i] = points[i - 1] + ((points[i] - points[i - 1]).Normalized() * parts[i - 1].length);
                 }
 
                 //angle constraints
@@ -115,7 +137,7 @@ namespace InverseKinematics
                     for (int i = 1; i < this.Zcur.Length; i++)
                     {
                         Zcur += this.Zcur[i - 1];
-                        points[i] = points[i - 1] + (new TDPoint((float)(parts[i - 1].arm.Length * Math.Cos(Zcur)), (float)(parts[i - 1].arm.Length * Math.Sin(Zcur)), 0));
+                        points[i] = points[i - 1] + (new TDPoint((float)(parts[i - 1].length * Math.Cos(Zcur)), (float)(parts[i - 1].length * Math.Sin(Zcur)), 0));
                     }
                 }
                 cost = calcCost(tar);
@@ -127,14 +149,25 @@ namespace InverseKinematics
 
         }
 
-        public void updatePoints()
+        //Figure out with our changed axes
+        public void pointUpdate()
         {
+            float z = 0;
             points[0] = new TDPoint(0, 0, 0);
-            for (int i = 0; i < parts.Length; i++)
+            for(int i = 0; i < Zcur.Length; i++)
             {
-                points[i + 1] = points[i] + parts[i].arm;
+                
             }
         }
+
+        //public void updatePoints()
+        //{
+        //    points[0] = new TDPoint(0, 0, 0);
+        //    for (int i = 0; i < parts.Length; i++)
+        //    {
+        //        points[i + 1] = points[i] + parts[i].arm;
+        //    }
+        //}
 
         public double calcCost(TDPoint target)
         {

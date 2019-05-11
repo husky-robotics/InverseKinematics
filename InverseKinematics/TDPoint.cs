@@ -32,6 +32,12 @@ namespace InverseKinematics
             }
         }
 
+        public TDPoint Normalized()
+        {
+            float len = Length;
+            return new TDPoint(x / len, y / len, z / len);
+        }
+
         public static Quaternion operator -(TDPoint a, TDPoint b)
         {
             return new Quaternion(0, a.x - b.x, a.y - b.y, a.z - b.z);
@@ -60,6 +66,11 @@ namespace InverseKinematics
         public static double operator *(TDPoint a, TDPoint b)
         {
             return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
+        }
+
+        public static TDPoint operator *(TDPoint a, float b)
+        {
+            return new TDPoint(a.x * b, a.y * b, a.z * b);
         }
 
         public void print()

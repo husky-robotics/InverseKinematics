@@ -4,7 +4,6 @@ namespace InverseKinematics
     public struct Quaternion
     {
         public float r, i, j, k;
-        //public int Xmin, Xmax, Ymin, Ymax, Zmin, Zmax;
 
         public Quaternion(float r, float i, float j, float k)
         {
@@ -25,14 +24,9 @@ namespace InverseKinematics
         public Quaternion Normalized()
         {
             float len = Length;
-            //Quaternion res;
-            //res.r = r / len;
-            //res.i = i / len;
-            //res.j = j / len;
-            //res.k = k / len;
             return new Quaternion(r / len, i / len, j / len, k / len);
-            //return res;
         }
+
         public float Length
         {
             get
@@ -42,40 +36,16 @@ namespace InverseKinematics
         }
         public static Quaternion operator !(Quaternion a)
         {
-            //Quaternion res;
-            //res.r = a.r;
-            //res.i = -a.i;
-            //res.j = -a.j;
-            //res.k = -a.k;
-            //res.Xmin = a.Xmin;
-            //res.Xmax = a.Xmax;
             return new Quaternion(a.r, -a.i, -a.j, -a.k);
-            //return res;
         }
 
 
         public static Quaternion operator -(Quaternion a)
         {
-            //Quaternion res;
-            //res.r = -a.r;
-            //res.i = -a.i;
-            //res.j = -a.j;
-            //res.k = -a.k;
-            //res.min = a.min;
-            //res.max = a.max;
-            //return res;
             return new Quaternion(-a.r, -a.i, -a.j, -a.k);
         }
         public static Quaternion operator +(Quaternion a, Quaternion b)
         {
-            //Quaternion res;
-            //res.r = a.r + b.r;
-            //res.i = a.i + b.i;
-            //res.j = a.j + b.j;
-            //res.k = a.k + b.k;
-            //res.min = 0;
-            //res.max = 360;
-            //return res;
             return new Quaternion(a.r + b.r, a.i + b.i, a.j + b.j, a.k + b.k);
         }
         public static Quaternion operator -(Quaternion a, Quaternion b)
@@ -90,13 +60,6 @@ namespace InverseKinematics
             res.j = a.r * b.j + b.r * a.j + a.k * b.i - a.i * b.k;
             res.k = a.r * b.k + b.r * a.k + a.i * b.j - a.j * b.i;
 
-            //min max of rot quats = 1
-            //res.Xmin = a.Xmin * b.Xmin;
-            //res.Xmax = a.Xmax * b.Xmax;
-            //res.Ymin = a.Ymin * b.Ymin;
-            //res.Ymax = a.Ymax * b.Ymax;
-            //res.Zmin = a.Zmin * b.Zmin;
-            //res.Zmax = a.Zmax * b.Zmax;
             return res;
         }
         public static Quaternion operator *(float len, Quaternion a)
@@ -140,7 +103,6 @@ namespace InverseKinematics
 
         public double angleBetween(Quaternion a)
         {
-            //return (180 / Math.PI) * ( Math.Acos((i*a.i + j*a.j + k*a.k)  / Length * a.Length  ));
             return (180 / Math.PI) * (Math.Acos((this % a) / (Length * a.Length)));
         }
 
@@ -148,8 +110,6 @@ namespace InverseKinematics
         {
             return angleRelativeTo(other, new Quaternion(0, 0, 0, 1));
         }
-
-        
 
         public double angleRelativeTo(Quaternion other, Quaternion axis)
         {
