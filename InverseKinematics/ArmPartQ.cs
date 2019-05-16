@@ -11,6 +11,7 @@ namespace InverseKinematics
         //public Quaternion arm;
         public float Xmin, Xmax, Ymin, Ymax, Zmin, Zmax;
         public float length;
+        public Quaternion arm;
         //public bool Xfix, Zfix;
 
         public ArmPartQ(float r, float i, float j, float k, float Xmin, float Xmax, float Ymin, float Ymax, float Zmin, float Zmax)
@@ -43,26 +44,19 @@ namespace InverseKinematics
         public TDPoint[] points;
         public double cost;
         public float baser;
+        
 
-
-        public ArmQ(float[] z, float br, ArmPartQ[] segs)
-        {
+        public ArmQ(float[] z, float br, ArmPartQ[] segs) {
             Zcur = z;
             points = new TDPoint[z.Length + 1];
             baser = br;
             parts = segs;
+            findPoints();
         }
+        
 
-        public ArmQ(ArmPartQ[] segs)
-        {
-            //parts = segs;
-            //Zcur = new float[parts.Length];
-            //points = new TDPoint[parts.Length + 1];
-            //updatePoints();
-        }
+        public void converge(TDPoint target) {
 
-        public void converge(TDPoint target)
-        {
             TDPoint tShadow = new TDPoint(target.x, 0, target.z);
             TDPoint aShadow = new TDPoint(points[points.Length - 1].x, 0, points[points.Length - 1].z);
 
@@ -74,18 +68,18 @@ namespace InverseKinematics
             TDPoint tar = new TDPoint((float)(target.Length * Math.Cos(t)), target.y, 0);
 
             float zTot = 0;
-            double distance;
             points[0] = new TDPoint(0, 0, 0);
+            
             for (int i = 1; i < points.Length; i++) {
                 zTot += Zcur[i - 1];
-                distance = points[i].Length;
-                points[i] = new TDPoint((float)(distance * Math.Cos(zTot)), (float)(distance * Math.Sin(zTot)), 0) + points[i - 1];
+                points[i] = new TDPoint((float)(parts[i - 1].length * Math.Cos(zTot)), (float)(parts[i - 1].length * Math.Sin(zTot)), 0) + points[i - 1];
             }
 
             cost = calcCost(target);
-            ////////////////////////////////////////////Moving Joints////////////////////////////////////////////
+            
             while (cost > 0.001) {
-                for (int i = points.Length - 2; i >= 0; i--){
+                ////////////////////////////////////////////Moving Joints////////////////////////////////////////////
+                for (int i = points.Length - 2; i >= 0; i--) {
                     if (i == points.Length - 2) {
                         points[i + 1] = tar;
                     }
@@ -94,19 +88,12 @@ namespace InverseKinematics
 
                 points[0].set(0, 0, 0);
                 for (int i = 1; i < points.Length; i++) {
-                    //parts[i - 1].arm = ((points[i] - points[i - 1]).Normalized() * parts[i - 1].arm.Length);
                     points[i] = points[i - 1] + ((points[i] - points[i - 1]).Normalized() * parts[i - 1].length);
                 }
 
-                //angle constraints
-                double[] changes = new double[points.Length - 1];
-
+                /////////////////////////////////////////Correcting Angles////////////////////////////////////////////
                 for (int i = points.Length - 2; i > 0; i--) {
-                    //TDPoint pre = points[i] | points[i - 1];
-                    //TDPoint post = points[i + 1] | points[i];
-
                     double ang = (points[i] | points[i - 1]).angleRelativeTo(points[i + 1] | points[i]);
-
                     if (ang < parts[i].Zmin || ang > parts[i].Zmax) {
                         if (ang < parts[i].Zmin) {
                             Zcur[i] = parts[i].Zmin;
@@ -116,7 +103,7 @@ namespace InverseKinematics
                         }
                     }
                     else {
-                        Zcur[i] = (float)ang;
+                        Zcur[i] = (float)ang;  
                     }
                 }
                 double angle = (new TDPoint(1, 0, 0)).angleRelativeTo(points[1]);
@@ -130,35 +117,57 @@ namespace InverseKinematics
                     Zcur[0] = (float)angle;
                 }
 
-                //recalculate points
+                //////////////////////////////////////Recalculating Points/////////////////////////////////////////
                 {
-                    float Zcur = 0;
+
+                    float curZ = 0;
                     points[0].set(0, 0, 0);
-                    for (int i = 1; i < this.Zcur.Length; i++)
-                    {
-                        Zcur += this.Zcur[i - 1];
-                        points[i] = points[i - 1] + (new TDPoint((float)(parts[i - 1].length * Math.Cos(Zcur)), (float)(parts[i - 1].length * Math.Sin(Zcur)), 0));
+                    for (int i = 1; i < this.points.Length; i++) {
+                        curZ = (float)((curZ + this.Zcur[i - 1]) % (2 * Math.PI));
+                        points[i] = points[i - 1] + (new TDPoint((float)(parts[i - 1].length * Math.Cos(curZ)), (float)(parts[i - 1].length * Math.Sin(curZ)), 0));
                     }
                 }
                 cost = calcCost(tar);
             }
+
             Console.WriteLine(baseRotation);
+            printPoints();
+            Console.WriteLine();
+        }
+
+        public void printPoints() {
             for (int i = 0; i < points.Length; i++) {
                 points[i].print();
             }
+        }
 
+        public void printAngles() {
+            for (int i = 0; i < Zcur.Length; i++) {
+                Console.WriteLine(Zcur[i] * 180 / Math.PI);
+            }
         }
 
         //Figure out with our changed axes
-        public void pointUpdate()
-        {
+        public void findPoints() {
             float z = 0;
             points[0] = new TDPoint(0, 0, 0);
             for(int i = 0; i < Zcur.Length; i++)
             {
-                
+                z += Zcur[i];
+                points[i + 1] = points[i] + new TDPoint((float)(parts[i].length * Math.Cos(baser)* Math.Cos(z)),
+                                                        (float)(parts[i].length * Math.Sin(z)),
+                                                        (float)(parts[i].length * Math.Cos(z) * Math.Sin(baser)));
             }
+
+            printPoints();
+            Console.WriteLine();
         }
+
+
+        public double calcCost(TDPoint target) {
+            return Math.Sqrt(Math.Pow(points[points.Length - 1].x - target.x, 2) + Math.Pow(points[points.Length - 1].y - target.y, 2) + Math.Pow(points[points.Length - 1].z - target.z, 2));
+        }
+
 
         //public void updatePoints()
         //{
@@ -168,10 +177,5 @@ namespace InverseKinematics
         //        points[i + 1] = points[i] + parts[i].arm;
         //    }
         //}
-
-        public double calcCost(TDPoint target)
-        {
-            return Math.Sqrt(Math.Pow(points[points.Length - 1].x - target.x, 2) + Math.Pow(points[points.Length - 1].y - target.y, 2) + Math.Pow(points[points.Length - 1].z - target.z, 2));
-        }
     }
 }

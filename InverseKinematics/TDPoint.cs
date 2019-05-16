@@ -78,32 +78,34 @@ namespace InverseKinematics
             Console.WriteLine(x + " " + y + " " + z);
         }
 
-        //check later
-        public double angleBetween(TDPoint other)
+        public bool isEqual(TDPoint other)
         {
+            return this.x == other.x && this.y == other.y && this.z == other.z;
+        }
+
+        //check later
+        public double angleBetween(TDPoint other) {
             float crossed = (this % other).y;
-            if(crossed  == 0)
-            {
+            if(crossed  == 0) {
+                if(this.x / other.x < 0) {
+                    return Math.PI;
+                }
                 return 0;
             }
             return (crossed / Math.Abs(crossed)) * (Math.Acos((this * other) / (this.Length * other.Length)));
         }
 
-        public double angleRelativeTo(TDPoint other)
-        {
+        public double angleRelativeTo(TDPoint other) {
             float crossed = (this % other).z;
 
-            if(crossed == 0)
-            {
+            if(crossed == 0) {
                 return 0;
             }
-            else if (crossed > 0)
-            {
+            else if (crossed > 0) {
                 return Math.Acos((this * other) / (this.Length * other.Length));
             }
-            else
-            {
-                return 2 * Math.PI - Math.Acos((this * other) / (this.Length * other.Length));
+            else {
+                return (2 * Math.PI) - (Math.Acos((this * other) / (this.Length * other.Length)));
             }
 
         }
