@@ -15,8 +15,7 @@ namespace InverseKinematics
         static float[] angleY = { 0, 0, 0 };
         static float[] angleZ = { 0, 0, 0 };
 
-        static void Main(string[] args)
-        {
+        static void Main(string[] args) {
             //For 2D
             //DrawingWindow window = new DrawingWindow();
 
@@ -26,7 +25,8 @@ namespace InverseKinematics
 
             //fkTest(true);
 
-            FABRIKTest();
+            //FABRIKTest();
+            ArmFTest();
         }
 
         public static void alignmentTest()
@@ -66,9 +66,8 @@ namespace InverseKinematics
             float[][] finalAngles = inv.getAngles();
         }
 
-        public static void FABRIKTest()
-        {
-            TDPoint target = new TDPoint(70f, 60f, 80f);
+        public static void FABRIKTest() {
+            TDPoint target = new TDPoint(70f, 70f, 70f);
             float r = (float)(Math.PI / 180);
 
             ArmPartQ a = new ArmPartQ(50, 0, 0, 0, 0, 0 * r, 180 * r);
@@ -83,8 +82,24 @@ namespace InverseKinematics
             arm1.printAngles();
         }
 
-        public static double rad(float angle)
-        {
+        public static void ArmFTest() {
+            TDPoint target = new TDPoint(80f, 80f, 0f);
+            float r = (float)(Math.PI / 180);
+
+            ArmPartF a = new ArmPartF(50, 0, 0, 0, 0, 0 * r, 180 * r);
+            ArmPartF b = new ArmPartF(50, 0, 0, 0, 0, 0 * r, 180 * r);
+            ArmPartF c = new ArmPartF(50, 0, 0, 0, 0, 0 * r, 180 * r);
+            //ArmPartF d = new ArmPartF(8f, 0, 0, 0, 0, 0 * r, 180 * r);
+
+            ArmPartF[] asdf = { a, b, c };
+            float[] Zs = { 0f, 0f, 0f };
+
+            ArmF arm1 = new ArmF(Zs, 0 * r, asdf);
+            arm1.converge(target);
+            arm1.printAngles();
+        }
+
+        public static double rad(float angle) {
             return (Math.PI / 180) * angle;
         }
     }

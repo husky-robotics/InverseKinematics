@@ -10,66 +10,55 @@ namespace InverseKinematics
     {
         public float x, y, z;
 
-        public TDPoint(float x, float y, float z)
-        {
+        public TDPoint(float x, float y, float z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
-        public void set(float x, float y, float z)
-        {
+        public void set(float x, float y, float z) {
             this.x = x;
             this.y = y;
             this.z = z;
         }
 
-        public float Length
-        {
-            get
-            {
+        public float Length {
+            get {
                 return(float)Math.Sqrt(x * x + y * y + z * z);
             }
         }
 
-        public TDPoint Normalized()
-        {
+        public TDPoint Normalized() {
             float len = Length;
             return new TDPoint(x / len, y / len, z / len);
         }
 
-        public static Quaternion operator -(TDPoint a, TDPoint b)
-        {
+        public static Quaternion operator -(TDPoint a, TDPoint b) {
             return new Quaternion(0, a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
-        public static TDPoint operator |(TDPoint a, TDPoint b)
-        {
+        public static TDPoint operator |(TDPoint a, TDPoint b) {
             return new TDPoint(a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
-        public static TDPoint operator +(TDPoint a, Quaternion b)
-        {
+        public static TDPoint operator +(TDPoint a, Quaternion b) {
             return new TDPoint(a.x + b.i, a.y + b.j, a.z + b.k);
         }
 
-        public static TDPoint operator +(TDPoint a, TDPoint b)
-        {
+        public static TDPoint operator +(TDPoint a, TDPoint b) {
             return new TDPoint(a.x + b.x, a.y + b.y, a.z + b.z);
         }
 
-        public static TDPoint operator %(TDPoint a, TDPoint b)
-        {
+        //Cross Product
+        public static TDPoint operator %(TDPoint a, TDPoint b) {
             return new TDPoint( a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
         }
 
-        public static double operator *(TDPoint a, TDPoint b)
-        {
+        public static double operator *(TDPoint a, TDPoint b) {
             return (a.x * b.x) + (a.y * b.y) + (a.z * b.z);
         }
 
-        public static TDPoint operator *(TDPoint a, float b)
-        {
+        public static TDPoint operator *(TDPoint a, float b) {
             return new TDPoint(a.x * b, a.y * b, a.z * b);
         }
 
@@ -101,29 +90,32 @@ namespace InverseKinematics
             if(crossed == 0) {
                 return 0;
             }
-            else if (crossed > 0) {
-                return Math.Acos((this * other) / (this.Length * other.Length));
-            }
             else {
-                return (2 * Math.PI) - (Math.Acos((this * other) / (this.Length * other.Length)));
+                return (crossed / Math.Abs(crossed)) * Math.Acos((this * other) / (this.Length * other.Length));
             }
+            //else if (crossed > 0) {
+            //    return Math.Acos((this * other) / (this.Length * other.Length));
+            //}
+            //else {
+            //    return -Math.Acos((this * other) / (this.Length * other.Length));//(2 * Math.PI) - (Math.Acos((this * other) / (this.Length * other.Length)));
+            //}
 
         }
     }
 
-    public struct Point2D
-    {
-        public float x, y;
+    //public struct Point2D
+    //{
+    //    public float x, y;
 
-        public Point2D(float x, float y)
-        {
-            this.x = x;
-            this.y = y;
-        }
+    //    public Point2D(float x, float y)
+    //    {
+    //        this.x = x;
+    //        this.y = y;
+    //    }
 
-        public void print()
-        {
-            Console.WriteLine(x + " " + y);
-        }
-    }
+    //    public void print()
+    //    {
+    //        Console.WriteLine(x + " " + y);
+    //    }
+    //}
 }
